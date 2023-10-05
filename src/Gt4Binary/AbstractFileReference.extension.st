@@ -70,7 +70,8 @@ AbstractFileReference >> gtBinaryTreeFor: aView [
 
 { #category : #'*Gt4Binary' }
 AbstractFileReference >> isBinaryExecutable [
-	^ (self isExecutable and: [ self extension = '' ])
-		or: [ (#('a' 'o' 'so') includes: self extension)
-				or: [ self filename includesSubstring: '.so.' ] ]
+	^ self isFile
+		and: [ (self isExecutable and: [ self extension = '' ])
+				or: [ (#('a' 'o' 'so') includes: self extension)
+						or: [ self filename includesSubstring: '.so.' ] ] ]
 ]

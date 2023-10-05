@@ -7,11 +7,60 @@ Class {
 		'pathString',
 		'path'
 	],
+	#classVars : [
+		'LDDParser'
+	],
 	#classInstVars : [
 		'uniqueInstance'
 	],
 	#category : #Gt4Binary
 }
+
+{ #category : #accessing }
+MyEnvironment class >> getDependenciesFor: aFileReference [
+	| process |
+	process := GtSubprocessWithInMemoryOutput new
+			shellCommand: 'sh';
+			arguments: {'-c'.
+					'ldd ' , aFileReference asAbsolute pathString};
+			runAndWait.
+	^ process stdout lines
+]
+
+{ #category : #accessing }
+MyEnvironment class >> getDirectDependenciesFor: aFileReference [
+	| process |
+	process := GtSubprocessWithInMemoryOutput new
+			shellCommand: 'sh';
+			arguments: {'-c'.
+					'objdump -x ' , aFileReference asAbsolute pathString};
+			runAndWait.
+	^ process stdout lines
+		select: [ :each | each includesSubstring: 'NEEDED' ]
+		thenCollect: [ :each | (([ :c | c isSeparator ] split: each) reject: #isEmpty) second ]
+]
+
+{ #category : #accessing }
+MyEnvironment class >> gtSummaryFor: aView [
+	<gtClassView>
+	^ aView forward
+		title: 'Summary';
+		priority: 1;
+		object: [ self default ];
+		view: #gtPathsFor:
+]
+
+{ #category : #accessing }
+MyEnvironment class >> lddDependencyParser [
+	^ LDDParser
+		ifNil: [ LDDParser := ('=>' asPParser negate plus flatten trim , '=>' asPParser
+					, $( asPParser negate plus flatten trim , $( asPParser
+					, $) asPParser negate plus flatten trim , $) asPParser)
+					==> [ :t | 
+						{t first trimBoth.
+							t third trimBoth.
+							t fifth trimBoth} ] ]
+]
 
 { #category : #accessing }
 MyEnvironment >> gtPathsFor: aView [
