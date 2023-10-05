@@ -37,7 +37,7 @@ MyEnvironment class >> getDirectDependenciesFor: aFileReference [
 			runAndWait.
 	^ process stdout lines
 		select: [ :each | each includesSubstring: 'NEEDED' ]
-		thenCollect: [ :each | (([ :c | c isSeparator ] split: each) reject: #isEmpty) second ]
+		thenCollect: [ :each | (([ :c | c isSeparator ] split: each) reject: #isEmpty) second trimBoth ]
 ]
 
 { #category : #accessing }
@@ -65,14 +65,16 @@ MyEnvironment class >> lddDependencyParser [
 { #category : #accessing }
 MyEnvironment >> gtPathsFor: aView [
 	<gtView>
-	^ aView columnedList
+	^ aView explicit
 		title: 'Directories in Path';
 		priority: 10;
-		items: self path;
-		column: 'Paths (Deduplicated & In the Order they Appear in "${PATH}" variable'
-			text: [ :each | 
-				each pathString , ' (' , each allBinaryFiles size asStringWithCommas
-					, ' binaries)' ]
+		stencil: [ BrAsyncWidget new matchParent
+				stencil: ("[" GtPhlowProtoView new columnedList
+						items: self path;
+						column: 'Paths (Deduplicated & In the Order they Appear in "${PATH}" variable'
+							text: [ :each | 
+								each pathString , ' (' , each allBinaryFiles size asStringWithCommas
+									, ' binaries)' ] "] asAsyncFuture wait") asElement ] asAsyncFuture
 ]
 
 { #category : #accessing }
