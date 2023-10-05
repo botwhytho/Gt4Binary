@@ -1,16 +1,17 @@
 Extension { #name : #AbstractFileReference }
 
 { #category : #'*Gt4Binary' }
+AbstractFileReference >> allBinaryFiles [
+	^ self allFiles select: #isBinaryExecutable
+]
+
+{ #category : #'*Gt4Binary' }
 AbstractFileReference >> gtBinaryTreeFor: aView [
 	<gtView>
 	| allBinaryFiles |
 	self isDirectory ifFalse: [ ^ aView empty ].
-	allBinaryFiles := self allFiles
-			select: [ :each | 
-				(each isExecutable and: [ each extension = '' ])
-					or: [ (#('a' 'o' 'so') includes: each extension)
-							or: [ each filename includesSubstring: '.so.' ] ] ]
-			thenCollect: [ :each | each withParents asOrderedCollection ].
+	allBinaryFiles := self allBinaryFiles
+			collect: [ :each | each withParents asOrderedCollection ].
 	allBinaryFiles
 		do: [ :each | [ each first isChildOf: self ] whileFalse: [ each removeFirst ] ].
 	^ aView columnedTree
@@ -65,4 +66,11 @@ AbstractFileReference >> gtBinaryTreeFor: aView [
 					on: FileException , FileSystemError
 					do: [ :anException | anException return: '' ] ]
 			width: 150
+]
+
+{ #category : #'*Gt4Binary' }
+AbstractFileReference >> isBinaryExecutable [
+	^ (self isExecutable and: [ self extension = '' ])
+		or: [ (#('a' 'o' 'so') includes: self extension)
+				or: [ self filename includesSubstring: '.so.' ] ]
 ]
