@@ -69,7 +69,7 @@ MyEnvironment >> gtPathsFor: aView [
 		title: 'Directories in Path';
 		priority: 10;
 		items: self path;
-		column: 'Paths'
+		column: 'Paths (Deduplicated & In the Order they Appear in "${PATH}" variable'
 			text: [ :each | 
 				each pathString , ' (' , each allBinaryFiles size asStringWithCommas
 					, ' binaries)' ]
