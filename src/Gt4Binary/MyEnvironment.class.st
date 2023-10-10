@@ -41,8 +41,18 @@ MyEnvironment class >> getDirectDependenciesFor: aFileReference [
 ]
 
 { #category : #accessing }
-MyEnvironment class >> gtSummaryFor: aView [
+MyEnvironment class >> gtSummaryFor2: aView [
 	<gtClassView>
+	^ aView forward
+		title: 'Summary2';
+		priority: 1;
+		object: [ self default ];
+		view: #gtPathsFor2:
+]
+
+{ #category : #accessing }
+MyEnvironment class >> gtSummaryFor: aView [
+	"<gtClassView>"
 	^ aView forward
 		title: 'Summary';
 		priority: 1;
@@ -63,8 +73,39 @@ MyEnvironment class >> lddDependencyParser [
 ]
 
 { #category : #accessing }
-MyEnvironment >> gtPathsFor: aView [
+MyEnvironment >> gtPathsFor2: aView [
 	<gtView>
+	| dynamicLabel |
+	dynamicLabel := [ :aPath | 
+		| aStream |
+		aStream := AsyncDepthFirstTraversalStream
+				root: aPath
+				children: [ :each | 
+					[ (each isSymlink not and: [ each isDirectory ])
+						ifTrue: [ each children
+								select: [ :aChild | aChild isDirectory or: [ aChild isBinaryExecutable ] ] ]
+						ifFalse: [ #() ] ] on: Error do: [ :ex | ex return: #() ] ].
+		BrLabel new
+			fitContent;
+			aptitude: BrGlamorousLabelAptitude;
+			withAsyncSinkDo: [ :anElementSink | 
+				anElementSink
+					sink: AsyncCounterSink new;
+					whenUpdate: [ :aLabel :aCounterSink | aLabel text: aPath pathString , ' (' , aCounterSink count asStringWithCommas , ' binaries)' ];
+					forwardStream: (aStream select: [:each| each isDirectory not "and: [each isSymlink not]"]) ] ].
+	^ aView explicit
+		title: 'Directories in Path';
+		priority: 10;
+		stencil: [ GtPhlowProtoView new columnedList
+				items: self path;
+				column: 'Paths (Deduplicated & In the Order they Appear in "${PATH}" variable'
+					icon: dynamicLabel
+					weight: 1 ]
+]
+
+{ #category : #accessing }
+MyEnvironment >> gtPathsFor: aView [
+	"<gtView>"
 	^ aView explicit
 		title: 'Directories in Path';
 		priority: 10;
@@ -74,7 +115,7 @@ MyEnvironment >> gtPathsFor: aView [
 						column: 'Paths (Deduplicated & In the Order they Appear in "${PATH}" variable'
 							text: [ :each | 
 								each pathString , ' (' , each allBinaryFiles size asStringWithCommas
-									, ' binaries)' ] "] asAsyncFuture wait") asElement ] asAsyncFuture
+									, ' binaries)' ] "] asAsyncFuture wait") asElement ] "asAsyncFuture"
 ]
 
 { #category : #accessing }

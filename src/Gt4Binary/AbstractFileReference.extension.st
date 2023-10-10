@@ -17,11 +17,11 @@ AbstractFileReference >> gtBinaryTreeFor: aView [
 	^ aView columnedTree
 		title: 'Binary Files' translated;
 		priority: 2;
-		items: [ allBinaryFiles
+		items: [ (allBinaryFiles
 				flatCollectAsSet: [ :each | 
 					[ each isEmpty ifTrue: [ #() ] ifFalse: [ {each removeFirst} ] ]
 						on: CollectionIsEmpty
-						do: [  ] ] ];
+						do: [  ] ]) asArray sorted: #basename ascending ];
 		children: [ :aChild | 
 			(allBinaryFiles
 				select: [ :each | 
@@ -31,7 +31,7 @@ AbstractFileReference >> gtBinaryTreeFor: aView [
 				thenCollect: [ :each | 
 					[ each isEmpty ifTrue: [ #() ] ifFalse: [ {each removeFirst} ] ]
 						on: CollectionIsEmpty
-						do: [  ] ]) flatten asSet ];
+						do: [  ] ]) flatten asSet asArray sorted: #basename ascending ];
 		column: 'Name' translated
 			icon: [ :each | 
 				| anIcon aName aContainer |
