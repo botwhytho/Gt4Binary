@@ -51,5 +51,5 @@ FileReference >> gtDirectDependenciesFor: aView [
 						name: self basename;
 						path: self;
 						calculateDependencies ]);
-		view: #gtRawFor:
+		view: #gtNeighborsFor:
 ]

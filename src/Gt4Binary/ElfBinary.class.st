@@ -44,7 +44,7 @@ ElfBinary >> calculateDependencies [
 
 { #category : #accessing }
 ElfBinary >> dependencies [
-	^ dependencies
+	^ dependencies ifNil: [ dependencies := OrderedCollection new ]
 ]
 
 { #category : #accessing }
@@ -66,8 +66,48 @@ ElfBinary >> getDirectDependenciesFor [
 ]
 
 { #category : #accessing }
+ElfBinary >> gtDependencyBuilderFor: aView withPackages: somePackages title: aTitle andPriority: aPriority [
+	^ aView mondrian
+		title: aTitle;
+		priority: aPriority;
+		painting: [ :aMondrian | 
+			aMondrian nodes
+				stencil: [ :each | 
+					BrLabel new
+						aptitude: BrGlamorousLabelAptitude;
+						text: ((each name
+								in: [ :aString | 
+									(each libraryDependents isEmpty and: [ each ~= self ])
+										ifTrue: [ aString , ' (' ", each dependencyType" , ')' ]
+										ifFalse: [ aString ] ]) asRopedText
+								in: [ :text | 
+									each = self ifTrue: [ text foreground: Color blue ].
+									text ]) ];
+				with: somePackages.
+			aMondrian edges
+				fromRightCenter;
+				toLeftCenter;
+				stencil: [ :aForeignKey :fromElement :toElement | BlSigmoidElement new border: (BlBorder paint: (Color gray alpha: 0.5) width: 2) ];
+				connectToAll: [ :each | each dependencies difference: each libraryDependents ].
+			aMondrian layout horizontalDominanceTree
+				levelDistance: 250;
+				nodeDistance: 50;
+				treesDistance: 75 ]
+]
+
+{ #category : #view }
+ElfBinary >> gtNeighborsFor: aView [
+	<gtView>
+	^ self
+		gtDependencyBuilderFor: aView
+		withPackages: {self} , "self libraryDependents ," self dependencies
+		title: 'Direct Neighbors'
+		andPriority: 2
+]
+
+{ #category : #accessing }
 ElfBinary >> libraryDependents [
-	^ libraryDependents
+	^ libraryDependents ifNil: [ libraryDependents := OrderedCollection new ]
 ]
 
 { #category : #accessing }
