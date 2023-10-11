@@ -18,13 +18,16 @@ FileReference >> gtDependenciesFor: aView [
 					aFileReference := each second asFileReference.
 					SystemBinaryRegistry default registry
 						at: aFileReference basename
-						put: aFileReference ] ];
-		column: 'Dependencies' text: [ :each | each pathString ]
+						put: (ElfBinary new
+								name: aFileReference basename;
+								path: aFileReference;
+								rawData: each) ] ];
+		column: 'Dependencies' text: [ :each | each path pathString ]
 ]
 
 { #category : #'*Gt4Binary' }
-FileReference >> gtDirectDependenciesFor: aView [
-	<gtView>
+FileReference >> gtDirectDependenciesFor2: aView [
+	"<gtView>"
 	self isBinaryExecutable ifFalse: [ ^ aView empty ].
 	^ aView columnedList
 		title: 'Direct Dependencies';
@@ -32,5 +35,21 @@ FileReference >> gtDirectDependenciesFor: aView [
 		items: [ (MyEnvironment getDirectDependenciesFor: self)
 				collect: [ :each | SystemBinaryRegistry default registry at: each ifAbsent: [ each ] ] ];
 		column: 'Dependencies'
-			text: [ :each | [ each pathString ] on: MessageNotUnderstood do: [ each ] ]
+			text: [ :each | [ each path pathString ] on: MessageNotUnderstood do: [ each , '*' ] ]
+]
+
+{ #category : #'*Gt4Binary' }
+FileReference >> gtDirectDependenciesFor: aView [
+	<gtView>
+	self isBinaryExecutable ifFalse: [ ^ aView empty ].
+	^ aView forward
+		title: 'Direct Dependencies';
+		priority: 1;
+		object: (SystemBinaryRegistry default registry
+				at: self basename
+				ifAbsentPut: [ ElfBinary new
+						name: self basename;
+						path: self;
+						calculateDependencies ]);
+		view: #gtRawFor:
 ]
