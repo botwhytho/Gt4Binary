@@ -2,7 +2,7 @@ Extension { #name : #FileReference }
 
 { #category : #'*Gt4Binary' }
 FileReference >> gtDependenciesFor: aView [
-	<gtView>
+	"<gtView>"
 	self isBinaryExecutable ifFalse: [ ^ aView empty ].
 	^ aView columnedList
 		title: 'Dependencies';

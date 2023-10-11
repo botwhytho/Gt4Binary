@@ -12,39 +12,48 @@ Class {
 }
 
 { #category : #accessing }
+ElfBinary >> allDependencies [
+	^ self withDeepCollect: #dependencies as: Set
+]
+
+{ #category : #accessing }
 ElfBinary >> calculateDependencies [
 	| parsed process |
-	process := GtSubprocessWithInMemoryOutput new
-			shellCommand: 'sh';
-			arguments: {'-c'.
-					'ldd ' , self path asAbsolute pathString};
-			runAndWait.
-	parsed := process stdout lines
-			collect: [ :each | MyEnvironment lddDependencyParser parse: each ]
-			thenSelect: #isArray.
-	parsed
-		do: [ :each | 
-			| aFileReference |
-			aFileReference := each second asFileReference.
-			SystemBinaryRegistry default registry
-				at: aFileReference basename
-				ifAbsentPut: (ElfBinary new
-						name: aFileReference basename;
-						path: aFileReference;
-						rawData: each) ].
-	self
-		dependencies: (self getDirectDependenciesFor
-				collect: [ :each | 
+	self path = 'Unresolved'
+		ifTrue: [ self dependencies: #() ]
+		ifFalse: [ process := GtSubprocessWithInMemoryOutput new
+					shellCommand: 'sh';
+					arguments: {'-c'.
+							'ldd ' , self path asAbsolute pathString};
+					runAndWait.
+			parsed := process stdout lines
+					collect: [ :each | MyEnvironment lddDependencyParser parse: each ]
+					thenSelect: #isArray.
+			parsed
+				do: [ :each | 
+					| aFileReference |
+					aFileReference := each second asFileReference.
 					SystemBinaryRegistry default registry
-						at: each
-						ifAbsent: [ ElfBinary new
-								name: each;
-								path: 'Unresolved' ] ])
+						at: aFileReference basename
+						ifAbsentPut: (ElfBinary new
+								name: aFileReference basename;
+								path: aFileReference;
+								rawData: each) ].
+			self
+				dependencies: (self getDirectDependenciesFor
+						collect: [ :each | 
+							SystemBinaryRegistry default registry
+								at: each
+								ifAbsent: [ ElfBinary new
+										name: each;
+										path: 'Unresolved' ] ]) ]
 ]
 
 { #category : #accessing }
 ElfBinary >> dependencies [
-	^ dependencies ifNil: [ dependencies := OrderedCollection new ]
+	^ dependencies
+		ifNil: [ self calculateDependencies.
+			dependencies ]
 ]
 
 { #category : #accessing }
@@ -65,6 +74,16 @@ ElfBinary >> getDirectDependenciesFor [
 		thenCollect: [ :each | (([ :c | c isSeparator ] split: each) reject: #isEmpty) second trimBoth ]
 ]
 
+{ #category : #view }
+ElfBinary >> gtDependenciesFor: aView [
+	<gtView>
+	^ self
+		gtDependencyBuilderFor: aView
+		withPackages: self allDependencies
+		title: 'Dependencies'
+		andPriority: 4
+]
+
 { #category : #accessing }
 ElfBinary >> gtDependencyBuilderFor: aView withPackages: somePackages title: aTitle andPriority: aPriority [
 	^ aView mondrian
@@ -77,9 +96,13 @@ ElfBinary >> gtDependencyBuilderFor: aView withPackages: somePackages title: aTi
 						aptitude: BrGlamorousLabelAptitude;
 						text: ((each name
 								in: [ :aString | 
-									(each libraryDependents isEmpty and: [ each ~= self ])
-										ifTrue: [ aString , ' (' ", each dependencyType" , ')' ]
-										ifFalse: [ aString ] ]) asRopedText
+									"(each libraryDependents isEmpty and: [ each ~= self ])
+										ifTrue: [ aString , ' (' , each dependencyType , ')' ]
+										ifFalse: [ aString ]"
+									each path = 'Unresolved'
+										ifTrue: [ aString , '(Unresolved)' ]
+										ifFalse: [ aString ]	
+										 ]) asRopedText
 								in: [ :text | 
 									each = self ifTrue: [ text foreground: Color blue ].
 									text ]) ];
@@ -87,12 +110,12 @@ ElfBinary >> gtDependencyBuilderFor: aView withPackages: somePackages title: aTi
 			aMondrian edges
 				fromRightCenter;
 				toLeftCenter;
-				stencil: [ :aForeignKey :fromElement :toElement | BlSigmoidElement new border: (BlBorder paint: (Color gray alpha: 0.5) width: 2) ];
+				stencil: [ :aForeignKey :fromElement :toElement | BlSigmoidElement new border: (BlBorder paint: (Color gray alpha: 0.5) width: 1) ];
 				connectToAll: [ :each | each dependencies difference: each libraryDependents ].
 			aMondrian layout horizontalDominanceTree
-				levelDistance: 250;
+				levelDistance: 50;
 				nodeDistance: 50;
-				treesDistance: 75 ]
+				treesDistance: 50 ]
 ]
 
 { #category : #view }
