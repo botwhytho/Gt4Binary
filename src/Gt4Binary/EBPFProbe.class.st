@@ -65,6 +65,11 @@ wait $sudo_pid
 	self process: (generateUProbe value: self binary path value: self function) spawn
 ]
 
+{ #category : #finalization }
+EBPFProbe >> finalize [
+	self disable
+]
+
 { #category : #accessing }
 EBPFProbe >> function [
 	^ function
