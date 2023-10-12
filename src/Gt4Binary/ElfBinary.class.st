@@ -7,7 +7,8 @@ Class {
 		'dependencies',
 		'rawData',
 		'libraryDependents',
-		'eBPFProbes'
+		'eBPFProbes',
+		'publicFunctions'
 	],
 	#category : #Gt4Binary
 }
@@ -48,6 +49,22 @@ ElfBinary >> calculateDependencies [
 								ifAbsent: [ ElfBinary new
 										name: each;
 										path: 'Unresolved' ] ]) ]
+]
+
+{ #category : #accessing }
+ElfBinary >> calculatePublicFunctions [
+	| headers process publicSymbols |
+	headers := 'Name | Value | Class | Type | Size | Line | Section'.
+	process := GtSubprocessWithInMemoryOutput new
+			shellCommand: 'nm -gC -f s ' , self path asAbsolute pathString , ' | tail -n +7';
+			runAndWait.
+	publicSymbols := PSVParser
+			parseStringOrFileWithHeader: (OSPlatform current lineEnding
+					join: {headers.
+							process stdout}).
+	^ (publicSymbols
+		select: [ :each | (each at: 'Type') = 'FUNC' and: [ (each at: 'Section') ~= '*UND*' ] ])
+		sorted: [ :a :b | (a at: 'Name') < (b at: 'Name') ]
 ]
 
 { #category : #accessing }
@@ -198,11 +215,9 @@ ElfBinary >> path: anObject [
 	path := anObject
 ]
 
-{ #category : #view }
+{ #category : #accessing }
 ElfBinary >> publicFunctions [
-	^ {{'Name' -> 'clipboard_get_contents'.
-		'Value' -> '0000000000023b10'.
-		'Size' -> '000000000000004a'} asDictionary}
+	^ publicFunctions ifNil: [ publicFunctions := self calculatePublicFunctions ]
 ]
 
 { #category : #accessing }
