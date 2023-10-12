@@ -6,7 +6,8 @@ Class {
 		'path',
 		'dependencies',
 		'rawData',
-		'libraryDependents'
+		'libraryDependents',
+		'eBPFProbes'
 	],
 	#category : #Gt4Binary
 }
@@ -59,6 +60,16 @@ ElfBinary >> dependencies [
 { #category : #accessing }
 ElfBinary >> dependencies: anObject [
 	dependencies := anObject
+]
+
+{ #category : #accessing }
+ElfBinary >> eBPFProbes [
+	^ eBPFProbes ifNil: [ eBPFProbes := Dictionary new ]
+]
+
+{ #category : #accessing }
+ElfBinary >> eBPFProbes: anObject [
+	eBPFProbes := anObject
 ]
 
 { #category : #accessing }
@@ -128,6 +139,34 @@ ElfBinary >> gtNeighborsFor: aView [
 		andPriority: 2
 ]
 
+{ #category : #view }
+ElfBinary >> gtSummaryFor: aView [
+	<gtView>
+	^ aView columnedList
+		title: 'Summary';
+		priority: 6;
+		items: self publicFunctions;
+		column: 'Public Functions' text: [ :aSymbol | aSymbol at: 'Name' ];
+		column: 'Offset' text: [ :aSymbol | aSymbol at: 'Value' ];
+		column: 'Size' text: [ :aSymbol | aSymbol at: 'Size' ];
+		column: 'Trace'
+			icon: [ :aSymbol | 
+				BrCheckbox new
+					aptitude: BrGlamorousCheckboxAptitude;
+					whenCheckedDo: [ :anEvent | 
+						anEvent target phlow
+							spawnObject: (self eBPFProbes
+									at: (aSymbol at: 'Name')
+									put: (EBPFProbe new
+											binary: self;
+											function: (aSymbol at: 'Name');
+											enable)) ];
+					whenUncheckedDo: [ | anEPFProbe |
+						anEPFProbe := (self eBPFProbes at: (aSymbol at: 'Name')) disable.
+						self eBPFProbes removeKey: (aSymbol at: 'Name') ifAbsent: [  ] ] ]
+			weight: 1
+]
+
 { #category : #accessing }
 ElfBinary >> libraryDependents [
 	^ libraryDependents ifNil: [ libraryDependents := OrderedCollection new ]
@@ -156,6 +195,13 @@ ElfBinary >> path [
 { #category : #accessing }
 ElfBinary >> path: anObject [
 	path := anObject
+]
+
+{ #category : #view }
+ElfBinary >> publicFunctions [
+	^ {{'Name' -> 'clipboard_get_contents'.
+		'Value' -> '0000000000023b10'.
+		'Size' -> '000000000000004a'} asDictionary}
 ]
 
 { #category : #accessing }
