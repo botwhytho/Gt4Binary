@@ -161,8 +161,9 @@ ElfBinary >> gtSummaryFor: aView [
 											binary: self;
 											function: (aSymbol at: 'Name');
 											enable)) ];
-					whenUncheckedDo: [ | anEPFProbe |
-						anEPFProbe := (self eBPFProbes at: (aSymbol at: 'Name')) disable.
+					whenUncheckedDo: [ (self eBPFProbes at: (aSymbol at: 'Name')) disable.
+						self
+							flag: 'TODO: research if finalizer will cause a double free type of scenario. Probably need to gaurd more around freeing resources outside of Gt.'.
 						self eBPFProbes removeKey: (aSymbol at: 'Name') ifAbsent: [  ] ] ]
 			weight: 1
 ]
