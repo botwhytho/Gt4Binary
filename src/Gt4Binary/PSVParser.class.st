@@ -76,9 +76,9 @@ PSVParser class >> fileExtensionType [
 ]
 
 { #category : #parsing }
-PSVParser class >> parseFileWithHeader: aFilename [
+PSVParser class >> parseStringOrFileWithHeader: aFilename [
 	| lines headerLine headerNames |
-	lines := self parseFileWithoutHeader: aFilename.
+	lines := self parseStringOrFileWithoutHeader: aFilename.
 	lines isEmpty
 		ifTrue: [ ^ lines ].
 	headerLine := lines removeFirst.
@@ -96,22 +96,24 @@ PSVParser class >> parseFileWithHeader: aFilename [
 ]
 
 { #category : #parsing }
-PSVParser class >> parseFileWithoutHeader: aFilename [
+PSVParser class >> parseStringOrFileWithoutHeader: aFilename [
 	| file maxSize lines |
-	file := self parseFile: aFilename.
+	file := aFilename isString
+			ifTrue: [ self parse: aFilename ]
+			ifFalse: [ self parseFile: aFilename ].
 	maxSize := file lines
-		inject: 0
-		into: [ :sum :each | sum max: each values size ].
+			inject: 0
+			into: [ :sum :each | sum max: each values size ].
 	lines := file lines
-		collect:
-			[ :each | 
-			| line |
-			line := Array new: maxSize.
-			1 to: each values size do: [ :i | line at: i put: (self dataValueFrom: (each values at: i)) ].
-			line ].
+			collect: [ :each | 
+				| line |
+				line := Array new: maxSize.
+				1
+					to: each values size
+					do: [ :i | line at: i put: (self dataValueFrom: (each values at: i)) ].
+				line ].
 	(file lines size > 0
-		and:
-			[ file lines last pipes isEmpty
+		and: [ file lines last pipes isEmpty
 				and: [ (self dataValueFrom: file lines last values first) isNil ] ])
 		ifTrue: [ lines removeLast ].
 	^ lines
