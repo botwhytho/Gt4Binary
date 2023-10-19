@@ -4,7 +4,12 @@ Class {
 	#category : #'Gt4Binary-Message'
 }
 
-{ #category : #'api - accessing' }
+{ #category : #accessing }
 GtNotificationSudoPasswordEvent >> elementClass [
 	^ GtNotificationSudoPasswordElement
+]
+
+{ #category : #accessing }
+GtNotificationSudoPasswordEvent >> summaryClass [
+	^ GtNotificationSummary
 ]
