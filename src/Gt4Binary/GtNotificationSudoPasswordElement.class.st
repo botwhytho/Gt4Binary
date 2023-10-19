@@ -48,6 +48,17 @@ GtNotificationSudoPasswordElement >> initializeBorderElement [
 			withCloseButtonAction: [ self dismiss ]
 ]
 
+{ #category : #accessing }
+GtNotificationSudoPasswordElement >> magritteAcceptAction [
+	<magritteActionDescription>
+	^ super magritteAcceptAction
+		onSuccessCallback: (GtMagritteCallback new
+				action: [ :aModel :aButton :aMemento :aDescription | 
+					[ OSEnvironment current at: 'PASSWORD' put: self password asString.
+					self dismiss ] on: Error do: #debug ]);
+		beAlwaysEnabled
+]
+
 { #category : #magritte }
 GtNotificationSudoPasswordElement >> magritteCancelAction [
 	<magritteActionDescription>
