@@ -13,9 +13,10 @@ RewindingContextTestClass >> ensureSudo [
 			"self halt."
 			aContext := thisContext stack
 					detect: [ :each | 
+						"self halt."
 						each receiver class = GtPharoSnippetCoderViewModel
 							and: [ #(#doIt #doItAndGo) includes: each selector ] ].
 			self inform: aContext receiver class name , '>>' , aContext selector.
-			thisContext terminate ].
+			aContext return ].
 	self inform: 'Reached.'
 ]
