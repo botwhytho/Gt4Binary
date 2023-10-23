@@ -67,7 +67,10 @@ GtNotificationSudoPasswordElement >> magritteCancelAction [
 		onSuccessCallback: (GtMagritteCallback new
 				action: [ :aModel :aButton :aMemento :aDescription | 
 					[ self dismiss.
-					self notification context: nil ] on: Error do: #debug ]);
+					self notification context: nil.
+					self inform: 'Password was not provided so code wasn''t run' ]
+						on: Error
+						do: #debug ]);
 		beAlwaysEnabled
 ]
 

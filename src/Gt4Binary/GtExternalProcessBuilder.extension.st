@@ -18,6 +18,16 @@ GtExternalProcessBuilder class >> promptForPassword: aContext [
 ]
 
 { #category : #'*Gt4Binary' }
+GtExternalProcessBuilder >> tempTestMethod [
+	self inform: 'A method in cascade was triggered.'
+]
+
+{ #category : #'*Gt4Binary' }
+GtExternalProcessBuilder >> tempTestMethod2 [
+	self inform: 'Another method in cascade was triggered.'
+]
+
+{ #category : #'*Gt4Binary' }
 GtExternalProcessBuilder >> withOSLineEndings [
 	| currentArguments |
 	self arguments
