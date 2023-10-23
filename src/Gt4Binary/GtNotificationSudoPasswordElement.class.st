@@ -55,7 +55,8 @@ GtNotificationSudoPasswordElement >> magritteAcceptAction [
 		onSuccessCallback: (GtMagritteCallback new
 				action: [ :aModel :aButton :aMemento :aDescription | 
 					[ OSEnvironment current at: 'PASSWORD' put: self password asString.
-					self dismiss ] on: Error do: #debug ]);
+					self dismiss.
+					self notification context restart ] on: Error do: #debug ]);
 		beAlwaysEnabled
 ]
 
@@ -64,7 +65,9 @@ GtNotificationSudoPasswordElement >> magritteCancelAction [
 	<magritteActionDescription>
 	^ super magritteCancelAction
 		onSuccessCallback: (GtMagritteCallback new
-				action: [ :aModel :aButton :aMemento :aDescription | [ self dismiss ] on: Error do: #debug ]);
+				action: [ :aModel :aButton :aMemento :aDescription | 
+					[ self dismiss.
+					self notification context: nil ] on: Error do: #debug ]);
 		beAlwaysEnabled
 ]
 
