@@ -78,6 +78,7 @@ RewindingContextTestClass class >> ensureSudo8: aValueHolder [
 	| aContext |
 	aContext := thisContext stack
 			detect: [ :each | (each method isKindOf: CompiledCode) and: [ each method selector = #DoIt ] ].
+			self halt.
 	aValueHolder contents
 		ifNil: [ aValueHolder contents: aContext copyStack.
 			aContext return ].
