@@ -55,7 +55,9 @@ GtNotificationSudoPasswordElement >> magritteAcceptAction [
 		onSuccessCallback: (GtMagritteCallback new
 				action: [ :aModel :aButton :aMemento :aDescription | 
 					[ OSEnvironment current at: 'PASSWORD' put: self password asString.
-					aButton enqueueTask: [ self notification context restart ] asBlTask.
+					aButton enqueueTask: [ 
+					self notification context "restart" receiver
+						executeMethod: self notification context method ] asBlTask.
 					self dismiss ] on: Error do: #debug ]);
 		beAlwaysEnabled
 ]
