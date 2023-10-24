@@ -54,10 +54,9 @@ GtNotificationSudoPasswordElement >> magritteAcceptAction [
 	^ super magritteAcceptAction
 		onSuccessCallback: (GtMagritteCallback new
 				action: [ :aModel :aButton :aMemento :aDescription | 
-					[ OSEnvironment current at: 'PASSWORD' put: self password asString.	"self halt."
-					self dismiss.
-					self notification context restart "receiver
-						executeMethod: self notification context method" ] on: Error do: #debug ]);
+					[ OSEnvironment current at: 'PASSWORD' put: self password asString.
+					aButton enqueueTask: [ self notification context restart ] asBlTask.
+					self dismiss ] on: Error do: #debug ]);
 		beAlwaysEnabled
 ]
 
@@ -67,11 +66,9 @@ GtNotificationSudoPasswordElement >> magritteCancelAction [
 	^ super magritteCancelAction
 		onSuccessCallback: (GtMagritteCallback new
 				action: [ :aModel :aButton :aMemento :aDescription | 
-					[ self dismiss.
-					self notification context: nil.
-					self inform: 'Password was not provided so code wasn''t run' ]
-						on: Error
-						do: #debug ]);
+					[ self notification context: nil.
+					self inform: 'Password was not provided so code wasn''t run'.
+					self dismiss ] on: Error do: #debug ]);
 		beAlwaysEnabled
 ]
 
