@@ -74,6 +74,18 @@ RewindingContextTestClass class >> ensureSudo7: aValueHolder [
 ]
 
 { #category : #accessing }
+RewindingContextTestClass class >> ensureSudo8: aValueHolder [
+	| aContext |
+	aContext := thisContext stack
+			detect: [ :each | (each method isKindOf: CompiledCode) and: [ each method selector = #DoIt ] ].
+	aValueHolder contents
+		ifNil: [ aValueHolder contents: aContext copyStack.
+			aContext return ].
+	self inform: 'This code doesn''t get reached.'.
+	^ self new
+]
+
+{ #category : #accessing }
 RewindingContextTestClass class >> performAction [
 ]
 
@@ -110,4 +122,5 @@ RewindingContextTestClass >> ensureSudo [
 
 { #category : #accessing }
 RewindingContextTestClass >> reached [
+	self inform: 'Will this instance code get triggered.'
 ]

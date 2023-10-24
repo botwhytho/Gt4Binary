@@ -10,10 +10,12 @@ GtExternalProcessBuilder class >> promptForPassword: aContext [
 	| context |
 	OSEnvironment current
 		at: 'PASSWORD'
-		ifAbsent: [ context := aContext copyStack.
-			(BlSpace allSubInstances detect: #isFocused)
-				showNotification: (GtNotificationSudoPasswordEvent new context: context).
-			thisContext return ].
+		ifAbsent: [ context := thisContext stack
+					detect: [ :each | (each method isKindOf: CompiledCode) and: [ each method selector = #DoIt ] ].
+			BlSpace
+				spaceWithId: 0
+				do: [ :aSpace | aSpace showNotification: (GtNotificationSudoPasswordEvent new context: context copyStack) ].
+			context return ].
 	^ self new
 ]
 
