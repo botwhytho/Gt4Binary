@@ -21,8 +21,3 @@ GtNotificationSudoPasswordEvent >> context: anObject [
 GtNotificationSudoPasswordEvent >> elementClass [
 	^ GtNotificationSudoPasswordElement
 ]
-
-{ #category : #accessing }
-GtNotificationSudoPasswordEvent >> summaryClass [
-	^ GtNotificationSummary
-]
