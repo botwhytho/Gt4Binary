@@ -56,8 +56,8 @@ GtNotificationSudoPasswordElement >> magritteAcceptAction [
 				action: [ :aModel :aButton :aMemento :aDescription | 
 					[ OSEnvironment current at: 'PASSWORD' put: self password asString.	"self halt."
 					self dismiss.
-					self notification context "restart" receiver
-						executeMethod: self notification context method ] on: Error do: #debug ]);
+					self notification context restart "receiver
+						executeMethod: self notification context method" ] on: Error do: #debug ]);
 		beAlwaysEnabled
 ]
 
