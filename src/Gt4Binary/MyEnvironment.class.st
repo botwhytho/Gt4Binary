@@ -41,21 +41,12 @@ MyEnvironment class >> getDirectDependenciesFor: aFileReference [
 ]
 
 { #category : #accessing }
-MyEnvironment class >> gtSummaryFor2: aView [
+MyEnvironment class >> gtSummaryFor: aView [
+	<gtView>
 	<gtClassView>
 	^ aView forward
-		title: 'Summary2';
-		priority: 1;
-		object: [ self default ];
-		view: #gtPathsFor2:
-]
-
-{ #category : #accessing }
-MyEnvironment class >> gtSummaryFor: aView [
-	"<gtClassView>"
-	^ aView forward
-		title: 'Summary';
-		priority: 1;
+		title: 'Directories in Path';
+		priority: -1;
 		object: [ self default ];
 		view: #gtPathsFor:
 ]
@@ -73,7 +64,7 @@ MyEnvironment class >> lddDependencyParser [
 ]
 
 { #category : #accessing }
-MyEnvironment >> gtPathsFor2: aView [
+MyEnvironment >> gtPathsFor: aView [
 	<gtView>
 	| dynamicLabel |
 	dynamicLabel := [ :aPath | 
@@ -95,27 +86,12 @@ MyEnvironment >> gtPathsFor2: aView [
 					forwardStream: (aStream select: [:each| each isDirectory not "and: [each isSymlink not]"]) ] ].
 	^ aView explicit
 		title: 'Directories in Path';
-		priority: 10;
+		priority: -1;
 		stencil: [ GtPhlowProtoView new columnedList
 				items: self path;
 				column: 'Paths (Deduplicated & In the Order they Appear in "${PATH}" variable'
 					icon: dynamicLabel
 					weight: 1 ]
-]
-
-{ #category : #accessing }
-MyEnvironment >> gtPathsFor: aView [
-	"<gtView>"
-	^ aView explicit
-		title: 'Directories in Path';
-		priority: 10;
-		stencil: [ BrAsyncWidget new matchParent
-				stencil: ("[" GtPhlowProtoView new columnedList
-						items: self path;
-						column: 'Paths (Deduplicated & In the Order they Appear in "${PATH}" variable'
-							text: [ :each | 
-								each pathString , ' (' , each allBinaryFiles size asStringWithCommas
-									, ' binaries)' ] "] asAsyncFuture wait") asElement ] "asAsyncFuture"
 ]
 
 { #category : #accessing }
