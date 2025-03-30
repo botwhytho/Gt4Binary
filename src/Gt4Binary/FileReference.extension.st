@@ -41,6 +41,7 @@ FileReference >> gtDirectDependenciesFor2: aView [
 { #category : #'*Gt4Binary' }
 FileReference >> gtDirectDependenciesFor: aView [
 	<gtView>
+	self fileSystem isMemoryFileSystem ifTrue: [ ^ aView empty ].
 	self isBinaryExecutable ifFalse: [ ^ aView empty ].
 	^ aView forward
 		title: 'Direct Dependencies';
