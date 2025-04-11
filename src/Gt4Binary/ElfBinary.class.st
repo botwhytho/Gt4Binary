@@ -156,6 +156,18 @@ ElfBinary >> gtNeighborsFor: aView [
 		andPriority: 2
 ]
 
+{ #category : #search }
+ElfBinary >> gtSearchPublicFunctionsFor: aSearch [
+	<gtSearch>
+	^ aSearch list
+		title: 'Public Functions';
+		priority: 1;
+		items: [ self publicFunctions ];
+		itemsLimit: Float infinity;
+		itemName: [ :aSymbol | aSymbol at: 'Name' ];
+		filterBySubstring
+]
+
 { #category : #view }
 ElfBinary >> gtSummaryFor: aView [
 	<gtView>
@@ -163,7 +175,7 @@ ElfBinary >> gtSummaryFor: aView [
 		title: 'Summary';
 		priority: 6;
 		items: self publicFunctions;
-		column: 'Public Functions' text: [ :aSymbol | aSymbol at: 'Name' ];
+		column: 'Public Functions' text: [ :aSymbol | aSymbol at: 'Name' ] weight: 2.5;
 		column: 'Offset' text: [ :aSymbol | aSymbol at: 'Value' ];
 		column: 'Size' text: [ :aSymbol | aSymbol at: 'Size' ];
 		column: 'Trace'
@@ -182,7 +194,7 @@ ElfBinary >> gtSummaryFor: aView [
 						self
 							flag: 'TODO: research if finalizer will cause a double free type of scenario. Probably need to gaurd more around freeing resources outside of Gt.'.
 						self eBPFProbes removeKey: (aSymbol at: 'Name') ifAbsent: [  ] ] ]
-			weight: 1
+			weight: 0.50
 ]
 
 { #category : #accessing }
